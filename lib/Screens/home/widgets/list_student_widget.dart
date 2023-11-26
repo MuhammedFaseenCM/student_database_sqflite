@@ -48,9 +48,7 @@ class _ListStudentWidgetState extends State<ListStudentWidget> {
                 ),
                 trailing: IconButton(
                   onPressed: () {
-                    print("Added data ${data.id}");
                     deleteStudentAlert(context, data.id!);
-
                   },
                   icon: const Icon(
                     Icons.delete,
@@ -58,6 +56,7 @@ class _ListStudentWidgetState extends State<ListStudentWidget> {
                   ),
                 ),
                 onTap: () {
+                  print(data.toString());
                   Navigator.of(context).push(
                     MaterialPageRoute(
                       builder: (context) =>
@@ -77,7 +76,7 @@ class _ListStudentWidgetState extends State<ListStudentWidget> {
     );
   }
 
-  void deleteStudentAlert(context, int id) async {
+  Future<void> deleteStudentAlert(context, int id) async {
     showDialog(
       context: context,
       builder: (_) {
@@ -103,7 +102,7 @@ class _ListStudentWidgetState extends State<ListStudentWidget> {
     );
   }
 
-  showSnackbar() {
+  void showSnackbar() {
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
         content: Text('Deleted successfully'),

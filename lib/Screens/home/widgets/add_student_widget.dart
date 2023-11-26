@@ -270,13 +270,13 @@ class _AddStudentWidgetState extends State<AddStudentWidget> {
         imagePath: _imageToString,
       );
       await DBFunctions.instance.addStudent(student);
-      // _ageController.clear();
-      // _nameController.clear();
-      // _placeController.clear();
-      // _phoneController.clear();
-      // setState(() {
-      //   _imageToString = "";
-      // });
+      _ageController.clear();
+      _nameController.clear();
+      _placeController.clear();
+      _phoneController.clear();
+      setState(() {
+        _imageToString = "";
+      });
     }
   }
 }

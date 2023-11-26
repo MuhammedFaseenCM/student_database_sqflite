@@ -23,11 +23,9 @@ class DBFunctions extends ChangeNotifier {
   }
 
   Future<void> addStudent(StudentModel value) async {
-    final index = await _db.rawInsert(
+    await _db.rawInsert(
         'INSERT INTO student (name,age,place,phone,imagePath) VALUES (?,?,?,?,?)',
         [value.name, value.age, value.place, value.phone, value.imagePath]);
-    value.id = index;
-    print("Added data $index ${value.id}");
     getAllStudents();
   }
 
@@ -47,8 +45,7 @@ class DBFunctions extends ChangeNotifier {
   }
 
   Future<void> deleteStudent(int id) async {
-    final int = await _db.rawDelete('DELETE FROM student WHERE id = ?', [id]);
-    print("Deleted $int");
+    await _db.rawDelete('DELETE FROM student WHERE id = ?', [id]);
     getAllStudents();
   }
 

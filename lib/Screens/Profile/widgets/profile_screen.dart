@@ -5,16 +5,15 @@ import 'edit_screen.dart';
 
 class ProfileScreen extends StatelessWidget {
   final StudentModel data;
-  final int? index;
+  final int index;
   const ProfileScreen({
     super.key,
     required this.data,
-    this.index,
+    required this.index,
   });
 
   @override
   Widget build(BuildContext context) {
-    
     return Scaffold(
       appBar: AppBar(
         title: const Text('Profile'),

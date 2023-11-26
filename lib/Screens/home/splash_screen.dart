@@ -12,7 +12,6 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     gotoLogin(context);
-
     super.initState();
   }
 
@@ -34,7 +33,6 @@ class _SplashScreenState extends State<SplashScreen> {
           ),
         ));
   }
-
 
   Future<void> gotoLogin(context) async {
     await Future.delayed(const Duration(seconds: 3));

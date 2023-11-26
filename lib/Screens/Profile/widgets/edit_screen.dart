@@ -7,7 +7,7 @@ import '../../../db/model/data_model.dart';
 
 class EditScreen extends StatefulWidget {
   final StudentModel data;
-  final int? index;
+  final int index;
   const EditScreen({super.key, required this.data, required this.index});
 
   @override
@@ -171,7 +171,10 @@ class _EditScreenState extends State<EditScreen> {
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
-          builder: (context) => ProfileScreen(data: data),
+          builder: (context) => ProfileScreen(
+            data: data,
+            index: widget.index,
+          ),
         ),
       );
     }
@@ -239,7 +242,7 @@ class _EditScreenState extends State<EditScreen> {
     );
   }
 
-  acceptImage(ImageSource source, context) async {
+Future<void>  acceptImage(ImageSource source, context) async {
     final receiveImage = await _picker.pickImage(source: source);
     if (receiveImage == null) {
       return;

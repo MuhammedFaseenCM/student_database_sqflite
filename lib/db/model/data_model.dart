@@ -1,5 +1,5 @@
 class StudentModel {
-   int? id;
+  int? id;
 
   final String name;
 
@@ -33,5 +33,10 @@ class StudentModel {
       phone: phone,
       imagePath: imagePath,
     );
+  }
+
+  @override
+  String toString() {
+    return 'Student{id:$id, name:$name, age:$age, place:$place, phone:$phone}';
   }
 }
