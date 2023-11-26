@@ -1,9 +1,7 @@
-import 'dart:convert';
 import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:student_database/Screens/home/widgets/list_student_widget.dart';
+import 'package:student_database/Screens/Profile/widgets/profile_screen.dart';
 import 'package:student_database/db/functions/db_functions.dart';
 import '../../../db/model/data_model.dart';
 
@@ -27,14 +25,18 @@ class _EditScreenState extends State<EditScreen> {
 
   String _picture = '';
 
-  String _pictureToString = '';
-
   @override
-  Widget build(BuildContext context) {
+  void initState() {
     _nameController.text = widget.data.name.toString();
     _ageController.text = widget.data.age.toString();
     _placeController.text = widget.data.place.toString();
     _phoneController.text = widget.data.phone.toString();
+    _picture = widget.data.imagePath;
+    super.initState();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Edit details'),
@@ -146,7 +148,7 @@ class _EditScreenState extends State<EditScreen> {
     final age = _ageController.text.trim();
     final place = _placeController.text.trim();
     final phone = _phoneController.text.trim();
-    final image = _pictureToString;
+    final image = _picture;
 
     if (name.isEmpty ||
         age.isEmpty ||
@@ -155,19 +157,23 @@ class _EditScreenState extends State<EditScreen> {
         image.isEmpty) {
       return;
     } else {
-      final index = widget.index! + 1;
-
-      DBFunctions.instance.updateStudent(
+      final data = StudentModel(
+        id: widget.index,
         name: name,
         age: age,
         place: place,
         phone: phone,
-        image: image,
-        id: index,
+        imagePath: image,
       );
+      DBFunctions.instance.updateStudent(value: data);
       DBFunctions.instance.getAllStudents();
-      Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (context) => const ListStudentWidget()));
+      Navigator.of(context).pop();
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => ProfileScreen(data: data),
+        ),
+      );
     }
   }
 
@@ -213,8 +219,7 @@ class _EditScreenState extends State<EditScreen> {
         children: [
           CircleAvatar(
             radius: 50,
-            backgroundImage:
-                MemoryImage(const Base64Decoder().convert(_picture)),
+            backgroundImage: FileImage(File(_picture)),
           ),
           Positioned(
               child: InkWell(
@@ -239,10 +244,9 @@ class _EditScreenState extends State<EditScreen> {
     if (receiveImage == null) {
       return;
     } else {
-      final pictureTemp = File(receiveImage.path).readAsBytesSync();
+      final pictureTemp = File(receiveImage.path);
       setState(() {
-        _pictureToString = base64Encode(pictureTemp);
-        _picture = _pictureToString;
+        _picture = pictureTemp.path;
       });
       Navigator.of(context).pop();
     }

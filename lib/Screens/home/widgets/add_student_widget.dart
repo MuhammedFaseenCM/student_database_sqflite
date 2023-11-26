@@ -269,7 +269,14 @@ class _AddStudentWidgetState extends State<AddStudentWidget> {
         phone: phone,
         imagePath: _imageToString,
       );
-      DBFunctions.instance.addStudent(student);
+      await DBFunctions.instance.addStudent(student);
+      // _ageController.clear();
+      // _nameController.clear();
+      // _placeController.clear();
+      // _phoneController.clear();
+      // setState(() {
+      //   _imageToString = "";
+      // });
     }
   }
 }

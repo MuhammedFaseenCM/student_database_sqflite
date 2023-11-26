@@ -17,43 +17,52 @@ class DBFunctions extends ChangeNotifier {
       version: 1,
       onCreate: (Database db, int version) async {
         await db.execute(
-            'CREATE TABLE student (id INTEGER PRIMARY KEY, name TEXT, age TEXT, place TEXT, phone TEXT, image TEXT)');
+            'CREATE TABLE student (id INTEGER PRIMARY KEY, name TEXT, age TEXT, place TEXT, phone TEXT, imagePath TEXT)');
       },
     );
   }
 
   Future<void> addStudent(StudentModel value) async {
-    await _db.rawInsert(
-        'INSERT INTO student (name,age,place,phone,image) VALUES (?,?,?,?,?)',
+    final index = await _db.rawInsert(
+        'INSERT INTO student (name,age,place,phone,imagePath) VALUES (?,?,?,?,?)',
         [value.name, value.age, value.place, value.phone, value.imagePath]);
+    value.id = index;
+    print("Added data $index ${value.id}");
     getAllStudents();
   }
 
   Future<void> getAllStudents() async {
     final values = await _db.rawQuery('SELECT * FROM student');
     studentListNotifier.value.clear();
-    for (var map in values) {
-      final student = StudentModel.fromMap(map);
-      studentListNotifier.value.add(student);
-      studentListNotifier.notifyListeners();
+    if (values.isEmpty) {
+      studentListNotifier.value = [];
+    } else {
+      for (var map in values) {
+        final student = StudentModel.fromMap(map);
+        studentListNotifier.value.add(student);
+        studentListNotifier.notifyListeners();
+      }
     }
+    studentListNotifier.notifyListeners();
   }
 
   Future<void> deleteStudent(int id) async {
-    await _db.rawDelete('DELETE FROM student WHERE id = ?', [id]);
+    final int = await _db.rawDelete('DELETE FROM student WHERE id = ?', [id]);
+    print("Deleted $int");
     getAllStudents();
   }
 
-  Future<void> updateStudent(
-      {required String name,
-      required String age,
-      required String place,
-      required String phone,
-      required String image,
-      required int id}) async {
+  Future<void> updateStudent({required StudentModel value}) async {
     await _db.rawUpdate(
-        'UPDATE student SET name = ?, age = ?, place = ?, phone = ?, image = ? WHERE id = ?',
-        [name, age, place, phone, image, id]);
+        'UPDATE student SET name = ?, age = ?, place = ?, phone = ?, imagePath = ? WHERE id = ?',
+        [
+          value.name,
+          value.age,
+          value.place,
+          value.phone,
+          value.imagePath,
+          (value.id! + 1)
+        ]);
     getAllStudents();
   }
 }

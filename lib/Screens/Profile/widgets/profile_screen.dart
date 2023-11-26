@@ -1,8 +1,5 @@
-// ignore_for_file: public_member_api_docs, sort_constructors_first
-import 'dart:convert';
-
+import 'dart:io';
 import 'package:flutter/material.dart';
-
 import '../../../db/model/data_model.dart';
 import 'edit_screen.dart';
 
@@ -17,6 +14,7 @@ class ProfileScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    
     return Scaffold(
       appBar: AppBar(
         title: const Text('Profile'),
@@ -32,8 +30,11 @@ class ProfileScreen extends StatelessWidget {
               children: [
                 CircleAvatar(
                   radius: 50,
-                  backgroundImage:
-                      MemoryImage(const Base64Decoder().convert(data.imagePath,),),
+                  backgroundImage: FileImage(
+                    File(
+                      data.imagePath,
+                    ),
+                  ),
                 ),
                 Text(
                   data.name,

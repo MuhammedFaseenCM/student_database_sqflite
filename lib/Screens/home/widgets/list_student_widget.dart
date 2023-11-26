@@ -1,4 +1,4 @@
-import 'dart:convert';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import '../../../db/functions/db_functions.dart';
 import '../../../db/model/data_model.dart';
@@ -13,6 +13,12 @@ class ListStudentWidget extends StatefulWidget {
 
 class _ListStudentWidgetState extends State<ListStudentWidget> {
   @override
+  void initState() {
+    DBFunctions.instance.getAllStudents();
+    super.initState();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -22,20 +28,29 @@ class _ListStudentWidgetState extends State<ListStudentWidget> {
         valueListenable: studentListNotifier,
         builder:
             (BuildContext ctx, List<StudentModel> studentList, Widget? child) {
+          if (studentList.isEmpty) {
+            return const Center(
+              child: Text(
+                "Student list is empty",
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              ),
+            );
+          }
           return ListView.separated(
             itemBuilder: (ctx, index) {
               final data = studentList[index];
               return ListTile(
                 title: Text(data.name),
                 leading: CircleAvatar(
-                  backgroundImage: MemoryImage(
-                    const Base64Decoder().convert(data.imagePath),
+                  backgroundImage: FileImage(
+                    File(data.imagePath),
                   ),
                 ),
                 trailing: IconButton(
                   onPressed: () {
-                    final currentIndex = index + 1;
-                    deleteStudentAlert(context, currentIndex);
+                    print("Added data ${data.id}");
+                    deleteStudentAlert(context, data.id!);
+
                   },
                   icon: const Icon(
                     Icons.delete,
@@ -62,16 +77,16 @@ class _ListStudentWidgetState extends State<ListStudentWidget> {
     );
   }
 
-  void deleteStudentAlert(BuildContext context, int id) async {
+  void deleteStudentAlert(context, int id) async {
     showDialog(
       context: context,
-      builder: (context1) {
+      builder: (_) {
         return AlertDialog(
           title: const Text('Are you sure want to delete ?'),
           actions: [
             TextButton(
-                onPressed: () {
-                  DBFunctions.instance.deleteStudent(id);
+                onPressed: () async {
+                  await DBFunctions.instance.deleteStudent(id);
                   Navigator.of(context).pop();
                   showSnackbar();
                 },
