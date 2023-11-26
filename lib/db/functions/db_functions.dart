@@ -25,7 +25,7 @@ class DBFunctions extends ChangeNotifier {
   Future<void> addStudent(StudentModel value) async {
     await _db.rawInsert(
         'INSERT INTO student (name,age,place,phone,image) VALUES (?,?,?,?,?)',
-        [value.name, value.age, value.place, value.phone, value.image]);
+        [value.name, value.age, value.place, value.phone, value.imagePath]);
     getAllStudents();
   }
 

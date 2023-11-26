@@ -9,14 +9,14 @@ class StudentModel {
 
   final String phone;
 
-  final String image;
+  final String imagePath;
 
   StudentModel(
       {required this.name,
       required this.age,
       required this.place,
       required this.phone,
-      required this.image,
+      required this.imagePath,
       this.id});
   static StudentModel fromMap(Map<String, Object?> map) {
     final id = map['id'] as int;
@@ -24,14 +24,14 @@ class StudentModel {
     final age = map['age'] as String;
     final place = map['place'] as String;
     final phone = map['phone'] as String;
-    final image = map['image'] as String;
+    final imagePath = map['imagePath'] as String;
     return StudentModel(
       id: id,
       name: name,
       age: age,
       place: place,
       phone: phone,
-      image: image,
+      imagePath: imagePath,
     );
   }
 }

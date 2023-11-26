@@ -33,7 +33,7 @@ class ProfileScreen extends StatelessWidget {
                 CircleAvatar(
                   radius: 50,
                   backgroundImage:
-                      MemoryImage(const Base64Decoder().convert(data.image)),
+                      MemoryImage(const Base64Decoder().convert(data.imagePath,),),
                 ),
                 Text(
                   data.name,

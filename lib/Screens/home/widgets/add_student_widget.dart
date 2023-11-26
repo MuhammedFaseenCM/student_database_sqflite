@@ -1,7 +1,8 @@
-import 'dart:convert';
+import 'dart:developer';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:student_database/Screens/home/widgets/list_student_widget.dart';
 import 'package:student_database/db/functions/db_functions.dart';
 import 'package:student_database/db/model/data_model.dart';
 
@@ -13,38 +14,40 @@ class AddStudentWidget extends StatefulWidget {
 }
 
 class _AddStudentWidgetState extends State<AddStudentWidget> {
-  final _nameControl = TextEditingController();
+  final _nameController = TextEditingController();
 
-  final _ageControl = TextEditingController();
+  final _ageController = TextEditingController();
 
-  final _placeControl = TextEditingController();
+  final _placeController = TextEditingController();
 
-  final _phoneControl = TextEditingController();
+  final _phoneController = TextEditingController();
 
   final _formKey = GlobalKey<FormState>();
 
-  final ImagePicker _picker = ImagePicker();
-
-  String _picture = '';
-
-  String _pictureToString = '';
+  final ImagePicker picker = ImagePicker();
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.only(left: 50, right: 50),
       child: Form(
         key: _formKey,
-        child: Column(children: [
+        child: Column(mainAxisSize: MainAxisSize.max, children: [
           const SizedBox(
-            height: 10,
+            height: 20,
           ),
           imageProfile(),
+          _imageToString == ''
+              ? const Text(
+                  'select your image',
+                  style: TextStyle(color: Colors.red),
+                )
+              : const SizedBox(),
           const SizedBox(
             height: 20,
           ),
           TextFormField(
-            controller: _nameControl,
+            controller: _nameController,
             decoration: const InputDecoration(
               hintText: 'Full name',
               border: OutlineInputBorder(),
@@ -52,18 +55,21 @@ class _AddStudentWidgetState extends State<AddStudentWidget> {
             validator: (value) {
               if (value == null || value.isEmpty) {
                 return 'Enter full name';
+              } else if (value.contains('12345678910')) {
+                return 'Name must be in letters';
               } else if (value.length < 3) {
-                return 'Name must be at least 3 character';
+                return 'Name must be atleast 3 character';
               } else {
                 return null;
               }
             },
           ),
           const SizedBox(
-            height: 20,
+            height: 10,
           ),
           TextFormField(
-            controller: _ageControl,
+            controller: _ageController,
+            keyboardType: TextInputType.number,
             decoration: const InputDecoration(
               hintText: 'Age',
               border: OutlineInputBorder(),
@@ -79,10 +85,10 @@ class _AddStudentWidgetState extends State<AddStudentWidget> {
             },
           ),
           const SizedBox(
-            height: 20,
+            height: 10,
           ),
           TextFormField(
-            controller: _placeControl,
+            controller: _placeController,
             decoration: const InputDecoration(
               hintText: 'Place',
               border: OutlineInputBorder(),
@@ -96,10 +102,11 @@ class _AddStudentWidgetState extends State<AddStudentWidget> {
             },
           ),
           const SizedBox(
-            height: 20,
+            height: 10,
           ),
           TextFormField(
-              controller: _phoneControl,
+              controller: _phoneController,
+              keyboardType: TextInputType.number,
               decoration: const InputDecoration(
                 hintText: 'Phone number',
                 border: OutlineInputBorder(),
@@ -114,13 +121,38 @@ class _AddStudentWidgetState extends State<AddStudentWidget> {
                 }
               }),
           const SizedBox(
-            height: 20,
+            height: 10,
           ),
           ElevatedButton.icon(
               onPressed: () {
                 if (_formKey.currentState!.validate()) {
-                  addButton();
-                  showSnackbar();
+                  onAddStudentButtonClicked();
+                  showDialog(
+                    context: context,
+                    builder: (_) {
+                      return AlertDialog(
+                        title: const Text('Successfully added'),
+                        actions: [
+                          TextButton(
+                            onPressed: () {
+                              Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder: (_) => const ListStudentWidget(),
+                                ),
+                              );
+                            },
+                            child: const Text('Goto List'),
+                          ),
+                          TextButton(
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                            },
+                            child: const Text('Back'),
+                          )
+                        ],
+                      );
+                    },
+                  );
                 }
               },
               icon: const Icon(Icons.add),
@@ -130,28 +162,44 @@ class _AddStudentWidgetState extends State<AddStudentWidget> {
     );
   }
 
-  Future<void> addButton() async {
-    final name = _nameControl.text.trim();
-    final age = _ageControl.text.trim();
-    final place = _placeControl.text.trim();
-    final phone = _phoneControl.text.trim();
-    final image = _pictureToString;
-
-    if (name.isEmpty ||
-        age.isEmpty ||
-        place.isEmpty ||
-        phone.isEmpty ||
-        image.isEmpty) {
-      return;
-    }
-
-    final student = StudentModel(
-        name: name, age: age, place: place, phone: phone, image: image);
-    DBFunctions.instance.addStudent(student);
-    DBFunctions.instance.getAllStudents();
+  Widget imageProfile() {
+    return Center(
+      child: Stack(children: [
+        Container(
+          height: 100,
+          width: 100,
+          decoration: _imageToString != ''
+              ? BoxDecoration(
+                  borderRadius: BorderRadius.circular(10),
+                  image: DecorationImage(
+                      fit: BoxFit.cover,
+                      image: FileImage(File(_imageToString))))
+              : BoxDecoration(
+                  borderRadius: BorderRadius.circular(10),
+                  color: Colors.blueGrey,
+                ),
+        ),
+        Positioned(
+          bottom: 10,
+          right: 10,
+          child: InkWell(
+            onTap: () {
+              showModalBottomSheet(
+                context: context,
+                builder: (builder) => bottomsheet(),
+              );
+            },
+            child: const Icon(
+              Icons.camera_alt,
+              color: Colors.white,
+            ),
+          ),
+        )
+      ]),
+    );
   }
 
-  Widget bottomSheet() {
+  Widget bottomsheet() {
     return Container(
       height: 100,
       width: MediaQuery.of(context).size.width,
@@ -170,13 +218,13 @@ class _AddStudentWidgetState extends State<AddStudentWidget> {
             children: <Widget>[
               TextButton.icon(
                   onPressed: () {
-                    acceptImage(ImageSource.gallery, context);
+                    pickImage(ImageSource.gallery);
                   },
                   icon: const Icon(Icons.image),
                   label: const Text('Gallery')),
               TextButton.icon(
                   onPressed: () {
-                    acceptImage(ImageSource.camera, context);
+                    pickImage(ImageSource.camera);
                   },
                   icon: const Icon(Icons.camera),
                   label: const Text('Camera'))
@@ -187,53 +235,41 @@ class _AddStudentWidgetState extends State<AddStudentWidget> {
     );
   }
 
-  Widget imageProfile() {
-    return Center(
-      child: Stack(
-        children: [
-          CircleAvatar(
-            radius: 50,
-            backgroundImage:
-                MemoryImage(const Base64Decoder().convert(_picture)),
-          ),
-          Positioned(
-              child: InkWell(
-            onTap: () {
-              showModalBottomSheet(
-                context: context,
-                builder: ((builder) => bottomSheet()),
-              );
-            },
-            child: const Icon(
-              Icons.camera_alt,
-              size: 30,
-            ),
-          ))
-        ],
-      ),
-    );
-  }
-
-  acceptImage(ImageSource source, context) async {
-    final receiveImage = await _picker.pickImage(source: source);
-    if (receiveImage == null) {
+  String _imageToString = '';
+  File imageTemp = File("");
+  Future<void> pickImage(ImageSource source) async {
+    final image = await ImagePicker().pickImage(source: source);
+    if (image == null) {
       return;
     } else {
-      final pictureTemp = File(receiveImage.path).readAsBytesSync();
+      imageTemp = File(image.path);
+      _imageToString = image.path;
+      log(_imageToString);
       setState(() {
-        _pictureToString = base64Encode(pictureTemp);
-        _picture = _pictureToString;
+        //  _images = imageTemp;
+        _imageToString = image.path;
+        Navigator.of(context).pop();
       });
-      Navigator.of(context).pop();
     }
   }
 
-  showSnackbar() {
-    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-      content: Text('Successfully added'),
-      behavior: SnackBarBehavior.floating,
-      margin: EdgeInsets.all(10),
-      backgroundColor: Colors.green,
-    ));
+  Future<void> onAddStudentButtonClicked() async {
+    final name = _nameController.text.trim();
+    final age = _ageController.text.trim();
+    final place = _placeController.text.trim();
+    final phone = _phoneController.text.trim();
+
+    if (name.isEmpty || age.isEmpty || place.isEmpty || phone.isEmpty) {
+      return;
+    } else {
+      final student = StudentModel(
+        name: name,
+        age: age,
+        place: place,
+        phone: phone,
+        imagePath: _imageToString,
+      );
+      DBFunctions.instance.addStudent(student);
+    }
   }
 }
