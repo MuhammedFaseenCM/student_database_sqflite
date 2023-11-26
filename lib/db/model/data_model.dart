@@ -26,6 +26,12 @@ class StudentModel {
     final phone = map['phone'] as String;
     final image = map['image'] as String;
     return StudentModel(
-        name: name, age: age, place: place, phone: phone, image: image);
+      id: id,
+      name: name,
+      age: age,
+      place: place,
+      phone: phone,
+      image: image,
+    );
   }
 }

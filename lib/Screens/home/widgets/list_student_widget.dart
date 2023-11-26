@@ -1,9 +1,5 @@
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
-import 'package:flutter/src/widgets/container.dart';
-import 'package:flutter/src/widgets/framework.dart';
-
 import '../../../db/functions/db_functions.dart';
 import '../../../db/model/data_model.dart';
 import '../../Profile/widgets/profile_screen.dart';
@@ -23,7 +19,7 @@ class _ListStudentWidgetState extends State<ListStudentWidget> {
         title: const Text('Student list'),
       ),
       body: ValueListenableBuilder(
-          valueListenable: studentlistNotifier,
+          valueListenable: studentListNotifier,
           builder: (BuildContext ctx, List<StudentModel> studentList,
               Widget? child) {
             return ListView.separated(
@@ -37,22 +33,20 @@ class _ListStudentWidgetState extends State<ListStudentWidget> {
                     ),
                     trailing: IconButton(
                         onPressed: () {
-                          // if (data.id != null) {
-                          final indx = index + 1;
-                          deleteStudentAlert(context, indx);
-
-                          // } else {
-                          //   print('student id is null');
-                          // }
+                          final currentIndex = index + 1;
+                          deleteStudentAlert(context, currentIndex);
                         },
-                        icon: Icon(
+                        icon: const Icon(
                           Icons.delete,
                           color: Colors.red,
                         )),
                     onTap: () {
-                      Navigator.of(context).push(MaterialPageRoute(
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
                           builder: (context) =>
-                              Profile_screen(data: data, index: index)));
+                              ProfileScreen(data: data, index: index),
+                        ),
+                      );
                     },
                   );
                 },
@@ -69,31 +63,34 @@ class _ListStudentWidgetState extends State<ListStudentWidget> {
         context: context,
         builder: (context1) {
           return AlertDialog(
-            title: Text('Are you sure want to delete ?'),
+            title: const Text('Are you sure want to delete ?'),
             actions: [
               TextButton(
                   onPressed: () {
-                    deleteStudent(id);
+                    DBFunctions.instance.deleteStudent(id);
                     Navigator.of(context).pop();
-                    showsnackbar();
+                    showSnackbar();
                   },
-                  child: Text('Yes')),
+                  child: const Text('Yes')),
               TextButton(
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                  },
-                  child: Text('No'))
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                child: const Text('No'),
+              )
             ],
           );
         });
   }
 
-  showsnackbar() {
-    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-      content: Text('Deleted succesfully'),
-      behavior: SnackBarBehavior.floating,
-      margin: EdgeInsets.all(10),
-      backgroundColor: Colors.green,
-    ));
+  showSnackbar() {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Deleted successfully'),
+        behavior: SnackBarBehavior.floating,
+        margin: EdgeInsets.all(10),
+        backgroundColor: Colors.green,
+      ),
+    );
   }
 }

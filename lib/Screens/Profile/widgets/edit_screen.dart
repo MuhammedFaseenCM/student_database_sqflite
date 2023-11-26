@@ -3,17 +3,14 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:student_database/Screens/Profile/widgets/profile_screen.dart';
 import 'package:student_database/Screens/home/widgets/list_student_widget.dart';
-import '../../../db/functions/db_functions.dart';
+import 'package:student_database/db/functions/db_functions.dart';
 import '../../../db/model/data_model.dart';
 
 class EditScreen extends StatefulWidget {
-  StudentModel data;
-
-  int? index;
-
-  EditScreen({super.key, required this.data, required this.index});
+  final StudentModel data;
+  final int? index;
+  const EditScreen({super.key, required this.data, required this.index});
 
   @override
   State<EditScreen> createState() => _EditScreenState();
@@ -45,7 +42,7 @@ class _EditScreenState extends State<EditScreen> {
       body: SingleChildScrollView(
         reverse: true,
         child: Padding(
-          padding: EdgeInsets.all(20),
+          padding: const EdgeInsets.all(20),
           child: Form(
             key: _formKey,
             child: Column(children: [
@@ -66,7 +63,7 @@ class _EditScreenState extends State<EditScreen> {
                   if (value == null || value.isEmpty) {
                     return 'Enter full name';
                   } else if (value.length < 3) {
-                    return 'Name must be atleast 3 character';
+                    return 'Name must be at least 3 character';
                   } else {
                     return null;
                   }
@@ -133,9 +130,6 @@ class _EditScreenState extends State<EditScreen> {
                   onPressed: () {
                     if (_formKey.currentState!.validate()) {
                       updateButton();
-                    } else {
-                      print('Empty');
-                      print(widget.index! + 1);
                     }
                   },
                   icon: const Icon(Icons.edit),
@@ -161,22 +155,23 @@ class _EditScreenState extends State<EditScreen> {
         image.isEmpty) {
       return;
     } else {
-      final indx = widget.index! + 1;
+      final index = widget.index! + 1;
 
-      updateStudent(
-          name: name,
-          age: age,
-          place: place,
-          phone: phone,
-          image: image,
-          id: indx);
-      getAllStudents();
+      DBFunctions.instance.updateStudent(
+        name: name,
+        age: age,
+        place: place,
+        phone: phone,
+        image: image,
+        id: index,
+      );
+      DBFunctions.instance.getAllStudents();
       Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (context) => ListStudentWidget()));
+          MaterialPageRoute(builder: (context) => const ListStudentWidget()));
     }
   }
 
-  Widget bottomsheet() {
+  Widget bottomSheet() {
     return Container(
       height: 100,
       width: MediaQuery.of(context).size.width,
@@ -195,16 +190,16 @@ class _EditScreenState extends State<EditScreen> {
             children: <Widget>[
               TextButton.icon(
                   onPressed: () {
-                    acceptImage(ImageSource.gallery);
+                    acceptImage(ImageSource.gallery, context);
                   },
-                  icon: Icon(Icons.image),
-                  label: Text('Gallery')),
+                  icon: const Icon(Icons.image),
+                  label: const Text('Gallery')),
               TextButton.icon(
                   onPressed: () {
-                    acceptImage(ImageSource.camera);
+                    acceptImage(ImageSource.camera, context);
                   },
-                  icon: Icon(Icons.camera),
-                  label: Text('Camera'))
+                  icon: const Icon(Icons.camera),
+                  label: const Text('Camera'))
             ],
           )
         ],
@@ -226,10 +221,10 @@ class _EditScreenState extends State<EditScreen> {
             onTap: () {
               showModalBottomSheet(
                 context: context,
-                builder: ((builder) => bottomsheet()),
+                builder: ((builder) => bottomSheet()),
               );
             },
-            child: Icon(
+            child: const Icon(
               Icons.camera_alt,
               size: 30,
             ),
@@ -239,14 +234,14 @@ class _EditScreenState extends State<EditScreen> {
     );
   }
 
-  acceptImage(ImageSource source) async {
-    final recieveImage = await _picker.pickImage(source: source);
-    if (recieveImage == null) {
+  acceptImage(ImageSource source, context) async {
+    final receiveImage = await _picker.pickImage(source: source);
+    if (receiveImage == null) {
       return;
     } else {
-      final picturetemp = File(recieveImage.path).readAsBytesSync();
+      final pictureTemp = File(receiveImage.path).readAsBytesSync();
       setState(() {
-        _pictureToString = base64Encode(picturetemp);
+        _pictureToString = base64Encode(pictureTemp);
         _picture = _pictureToString;
       });
       Navigator.of(context).pop();

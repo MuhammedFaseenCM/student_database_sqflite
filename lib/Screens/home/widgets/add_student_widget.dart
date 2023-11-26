@@ -1,26 +1,25 @@
 import 'dart:convert';
 import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:student_database/db/functions/db_functions.dart';
 import 'package:student_database/db/model/data_model.dart';
 
 class AddStudentWidget extends StatefulWidget {
-  AddStudentWidget({super.key});
+  const AddStudentWidget({super.key});
 
   @override
   State<AddStudentWidget> createState() => _AddStudentWidgetState();
 }
 
 class _AddStudentWidgetState extends State<AddStudentWidget> {
-  final _namecontrol = TextEditingController();
+  final _nameControl = TextEditingController();
 
-  final _agecontrol = TextEditingController();
+  final _ageControl = TextEditingController();
 
-  final _placecontrol = TextEditingController();
+  final _placeControl = TextEditingController();
 
-  final _phonecontrol = TextEditingController();
+  final _phoneControl = TextEditingController();
 
   final _formKey = GlobalKey<FormState>();
 
@@ -33,7 +32,7 @@ class _AddStudentWidgetState extends State<AddStudentWidget> {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.all(20),
+      padding: const EdgeInsets.all(20),
       child: Form(
         key: _formKey,
         child: Column(children: [
@@ -45,7 +44,7 @@ class _AddStudentWidgetState extends State<AddStudentWidget> {
             height: 20,
           ),
           TextFormField(
-            controller: _namecontrol,
+            controller: _nameControl,
             decoration: const InputDecoration(
               hintText: 'Full name',
               border: OutlineInputBorder(),
@@ -54,7 +53,7 @@ class _AddStudentWidgetState extends State<AddStudentWidget> {
               if (value == null || value.isEmpty) {
                 return 'Enter full name';
               } else if (value.length < 3) {
-                return 'Name must be atleast 3 character';
+                return 'Name must be at least 3 character';
               } else {
                 return null;
               }
@@ -64,7 +63,7 @@ class _AddStudentWidgetState extends State<AddStudentWidget> {
             height: 20,
           ),
           TextFormField(
-            controller: _agecontrol,
+            controller: _ageControl,
             decoration: const InputDecoration(
               hintText: 'Age',
               border: OutlineInputBorder(),
@@ -83,8 +82,8 @@ class _AddStudentWidgetState extends State<AddStudentWidget> {
             height: 20,
           ),
           TextFormField(
-            controller: _placecontrol,
-            decoration: InputDecoration(
+            controller: _placeControl,
+            decoration: const InputDecoration(
               hintText: 'Place',
               border: OutlineInputBorder(),
             ),
@@ -100,7 +99,7 @@ class _AddStudentWidgetState extends State<AddStudentWidget> {
             height: 20,
           ),
           TextFormField(
-              controller: _phonecontrol,
+              controller: _phoneControl,
               decoration: const InputDecoration(
                 hintText: 'Phone number',
                 border: OutlineInputBorder(),
@@ -120,10 +119,8 @@ class _AddStudentWidgetState extends State<AddStudentWidget> {
           ElevatedButton.icon(
               onPressed: () {
                 if (_formKey.currentState!.validate()) {
-                  AddButton();
-                  showsnackbar();
-                } else {
-                  print('Empty');
+                  addButton();
+                  showSnackbar();
                 }
               },
               icon: const Icon(Icons.add),
@@ -133,28 +130,28 @@ class _AddStudentWidgetState extends State<AddStudentWidget> {
     );
   }
 
-  Future<void> AddButton() async {
-    final _name = _namecontrol.text.trim();
-    final _age = _agecontrol.text.trim();
-    final _place = _placecontrol.text.trim();
-    final _phone = _phonecontrol.text.trim();
-    final _image = _pictureToString;
+  Future<void> addButton() async {
+    final name = _nameControl.text.trim();
+    final age = _ageControl.text.trim();
+    final place = _placeControl.text.trim();
+    final phone = _phoneControl.text.trim();
+    final image = _pictureToString;
 
-    if (_name.isEmpty ||
-        _age.isEmpty ||
-        _place.isEmpty ||
-        _phone.isEmpty ||
-        _image.isEmpty) {
+    if (name.isEmpty ||
+        age.isEmpty ||
+        place.isEmpty ||
+        phone.isEmpty ||
+        image.isEmpty) {
       return;
     }
 
     final student = StudentModel(
-        name: _name, age: _age, place: _place, phone: _phone, image: _image);
-    addStudent(student);
-    getAllStudents();
+        name: name, age: age, place: place, phone: phone, image: image);
+    DBFunctions.instance.addStudent(student);
+    DBFunctions.instance.getAllStudents();
   }
 
-  Widget bottomsheet() {
+  Widget bottomSheet() {
     return Container(
       height: 100,
       width: MediaQuery.of(context).size.width,
@@ -173,13 +170,13 @@ class _AddStudentWidgetState extends State<AddStudentWidget> {
             children: <Widget>[
               TextButton.icon(
                   onPressed: () {
-                    acceptImage(ImageSource.gallery);
+                    acceptImage(ImageSource.gallery, context);
                   },
                   icon: const Icon(Icons.image),
                   label: const Text('Gallery')),
               TextButton.icon(
                   onPressed: () {
-                    acceptImage(ImageSource.camera);
+                    acceptImage(ImageSource.camera, context);
                   },
                   icon: const Icon(Icons.camera),
                   label: const Text('Camera'))
@@ -204,7 +201,7 @@ class _AddStudentWidgetState extends State<AddStudentWidget> {
             onTap: () {
               showModalBottomSheet(
                 context: context,
-                builder: ((builder) => bottomsheet()),
+                builder: ((builder) => bottomSheet()),
               );
             },
             child: const Icon(
@@ -217,23 +214,23 @@ class _AddStudentWidgetState extends State<AddStudentWidget> {
     );
   }
 
-  acceptImage(ImageSource source) async {
-    final recieveImage = await _picker.pickImage(source: source);
-    if (recieveImage == null) {
+  acceptImage(ImageSource source, context) async {
+    final receiveImage = await _picker.pickImage(source: source);
+    if (receiveImage == null) {
       return;
     } else {
-      final picturetemp = File(recieveImage.path).readAsBytesSync();
+      final pictureTemp = File(receiveImage.path).readAsBytesSync();
       setState(() {
-        _pictureToString = base64Encode(picturetemp);
+        _pictureToString = base64Encode(pictureTemp);
         _picture = _pictureToString;
       });
       Navigator.of(context).pop();
     }
   }
 
-  showsnackbar() {
+  showSnackbar() {
     ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-      content: Text('Succesfully added'),
+      content: Text('Successfully added'),
       behavior: SnackBarBehavior.floating,
       margin: EdgeInsets.all(10),
       backgroundColor: Colors.green,
