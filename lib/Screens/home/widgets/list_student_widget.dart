@@ -12,6 +12,10 @@ class ListStudentWidget extends StatefulWidget {
 }
 
 class _ListStudentWidgetState extends State<ListStudentWidget> {
+  bool isSearching = false;
+  TextEditingController searchController = TextEditingController();
+  List<StudentModel> searchedStudent = [];
+
   @override
   void initState() {
     DBFunctions.instance.getAllStudents();
@@ -21,9 +25,7 @@ class _ListStudentWidgetState extends State<ListStudentWidget> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Student list'),
-      ),
+      appBar: _appBar(),
       body: ValueListenableBuilder(
         valueListenable: studentListNotifier,
         builder:
@@ -36,27 +38,33 @@ class _ListStudentWidgetState extends State<ListStudentWidget> {
               ),
             );
           }
-          return ListView.separated(
-            itemBuilder: (ctx, index) {
-              final data = studentList[index];
-              return ListTile(
-                title: Text(data.name),
-                leading: CircleAvatar(
-                  backgroundImage: FileImage(
-                    File(data.imagePath),
-                  ),
-                ),
-                trailing: IconButton(
-                  onPressed: () {
-                    deleteStudentAlert(context, data.id!);
-                  },
-                  icon: const Icon(
-                    Icons.delete,
-                    color: Colors.red,
-                  ),
-                ),
+          if (isSearching &&
+              searchController.text.isNotEmpty &&
+              searchedStudent.isEmpty) {
+            return const Center(
+              child: Text(
+                "No student found",
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              ),
+            );
+          }
+          return GridView.builder(
+            padding: const EdgeInsets.all(16.0),
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 2,
+              childAspectRatio: 0.8,
+            ),
+            itemBuilder: (_, index) {
+              final StudentModel data;
+              if (isSearching &&
+                  searchedStudent.isNotEmpty &&
+                  searchController.text.isNotEmpty) {
+                data = searchedStudent[index];
+              } else {
+                data = studentList[index];
+              }
+              return InkWell(
                 onTap: () {
-                  print(data.toString());
                   Navigator.of(context).push(
                     MaterialPageRoute(
                       builder: (context) =>
@@ -64,15 +72,89 @@ class _ListStudentWidgetState extends State<ListStudentWidget> {
                     ),
                   );
                 },
+                child: Column(
+                  children: [
+                    Container(
+                      height: 150,
+                      width: 150,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(10),
+                        image: DecorationImage(
+                          image: FileImage(
+                            File(data.imagePath),
+                          ),
+                          fit: BoxFit.cover,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            data.name,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                        IconButton(
+                          onPressed: () {
+                            deleteStudentAlert(context, data.id!);
+                          },
+                          color: Colors.red,
+                          icon: const Icon(Icons.delete),
+                        )
+                      ],
+                    ),
+                  ],
+                ),
               );
             },
-            separatorBuilder: (ctx, index) {
-              return const Divider();
-            },
-            itemCount: studentList.length,
+            itemCount: isSearching && searchController.text.isNotEmpty
+                ? searchedStudent.length
+                : studentList.length,
           );
         },
       ),
+    );
+  }
+
+  AppBar _appBar() {
+    return AppBar(
+      title: isSearching
+          ? TextFormField(
+              controller: searchController,
+              onChanged: (value) {
+                searchedStudent.clear();
+                for (var element in studentListNotifier.value) {
+                  if (element.name
+                      .toLowerCase()
+                      .contains(value.toLowerCase())) {
+                    searchedStudent.add(element);
+                  }
+                }
+                setState(() {});
+              },
+              decoration: const InputDecoration(
+                hintText: 'Search',
+                border: InputBorder.none,
+              ),
+            )
+          : const Text('Student list'),
+      actions: [
+        IconButton(
+          onPressed: () {
+            setState(() {
+              isSearching = !isSearching;
+            });
+          },
+          icon:
+              isSearching ? const Icon(Icons.close) : const Icon(Icons.search),
+        )
+      ],
     );
   }
 
